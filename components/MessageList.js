@@ -2,21 +2,17 @@ import React from 'react'
 import PropTypes from 'prop-types';
 import { FlatList, StyleSheet, Image, Text, Pressable, View} from 'react-native';
 import { MessageShape } from '../utils/MessageUtils';
-import { MapView, Marker }from 'react-native-maps';
+import MapView, { Marker }from 'react-native-maps';
 
 const keyExtractor = item => item.id.toString();
 
-function MessageList(props) {
-
-    const { messages } = props
+function MessageList({ messages, onPressMessage}) {
 
     const renderMessageItem = ({ item }) => {
-        const { onPressMessage } = props
 
         return (
             <View key={item.id} style={styles.messageRow} >
                 <Pressable onPress={() => onPressMessage(item)} >
-                    {console.log('inside pressable')}
                     {renderMessageBody(item)}
                 </Pressable>
             </View>
@@ -28,7 +24,6 @@ function MessageList(props) {
             case 'text':
                 return (
                     <View style={styles.messageBubble}>
-                        {console.log('inside case text')}
                         <Text style={styles.text}>{text}</Text>
                     </View>
                 );
@@ -46,7 +41,7 @@ function MessageList(props) {
                             longitudeDelta: 0.08,
                         }}
                     >
-                        <Marker coordinate={coordinate} />
+                        <Marker coordinate={coordinate}/>
                     </MapView>
                 );
             default:

@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, Alert, Image, Pressable, BackHandler } from 'react-native';
 import Status from './components/Status';
 
 import MessageList from './components/MessageList';
 import { createImageMessage, createLocationMessage, createTextMessage} from './utils/MessageUtils';
 
-export const RenderMessageList = (props) => {
-  const { messages, onPressMessage } = props
-  return (
-    <View style={styles.content}>
-      <MessageList messages={messages} onPressMessage={onPressMessage} />
-    </View>
-  )
-}
+// export const RenderMessageList = (props) => {
+//   const { messages, onPressMessage } = props
+//   return (
+//     <View style={styles.content}>
+//       <MessageList messages={messages} onPressMessage={onPressMessage} />
+//     </View>
+//   )
+// }
 
   const RenderInputMethodEditor = () => {
     return (
@@ -38,14 +38,78 @@ export default function App() {
     }),
   ])
 
-  handlePressMessage = (item) => {}
+  const [fullscreenImageId, setfullscreenImageId] = useState(null)
+
+  useEffect(() => {
+    const subscribtion = BackHandler.addEventListener('hardwareBackPress', () => {
+      if(fullscreenImageId) {
+        dismissFullScreenImage();
+        return true;
+      }
+      else return false;
+    });
+    return () => {
+      subscribtion.remove();
+    }
+  }, [])
+
+  handlePressMessage = ({id, type } ) => {
+    switch(type) {
+      case 'text':
+        Alert.alert(
+          'Delete message?',
+          'Are you sure you want to permanently delete this message?',
+          [
+            {
+              text: 'Cancel',
+              style: 'cancel',
+            },
+            {
+              text: 'Delete',
+              style: 'destructive',
+              onPress: () => {
+                const messagesToDelete = messages;
+                setMessages(messagesToDelete.filter(message => message.id !== id));
+              },
+            },
+          ],
+        );
+        break;
+      case 'image':
+        setfullscreenImageId(id)
+        break;
+      default:
+        break;
+    }
+  };
+  
+  dismissFullScreenImage = () => {
+    setfullscreenImageId(null);
+  }
+
+  renderFullScreenImage = () => {
+    if(!fullscreenImageId) return null;
+
+    const image = messages.find(message => message.id === fullscreenImageId);
+
+    if(!image) return null;
+
+    const { uri } = image;
+
+    return(
+      <Pressable style={styles.fullScreenOverlay} onPress={dismissFullScreenImage}>
+        <Image style={styles.fullscreenImage} source={{ uri }} />
+      </Pressable>
+    )
+  }
 
   return (
     <View style={styles.container}>
       <Status />
-      <RenderMessageList messages={messages} onPressMessage={handlePressMessage}/>
+      <MessageList messages={messages} onPressMessage={handlePressMessage}/>
       <RenderToolbar />
       <RenderInputMethodEditor />
+      {renderFullScreenImage()}
     </View>
   );
 }
@@ -68,4 +132,13 @@ const styles = StyleSheet.create({
     borderTopColor: 'black',
     backgroundColor: 'white'
   },
+  fullScreenOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'black',
+    zIndex: 2,
+  },
+  fullscreenImage: {
+    flex: 1,
+    resizeMode: 'contain',
+  }
 });
