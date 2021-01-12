@@ -1,18 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Alert, Image, Pressable, BackHandler } from 'react-native';
+import * as Location from 'expo-location';
+
 import Status from './components/Status';
 
 import MessageList from './components/MessageList';
+import Toolbar from './components/Toolbar';
+
 import { createImageMessage, createLocationMessage, createTextMessage} from './utils/MessageUtils';
 
-// export const RenderMessageList = (props) => {
-//   const { messages, onPressMessage } = props
-//   return (
-//     <View style={styles.content}>
-//       <MessageList messages={messages} onPressMessage={onPressMessage} />
-//     </View>
-//   )
-// }
 
   const RenderInputMethodEditor = () => {
     return (
@@ -39,6 +35,7 @@ export default function App() {
   ])
 
   const [fullscreenImageId, setfullscreenImageId] = useState(null)
+  const [location, setLocation] = useState(null);
 
   useEffect(() => {
     const subscribtion = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -103,11 +100,45 @@ export default function App() {
     )
   }
 
+  handleSubmit = (text) => {
+    const currentMessages = messages;
+
+    setMessages([createTextMessage(text), ...currentMessages]);
+  }
+
+  handlePressToolbarCamera = () => {}
+
+  handlePressToolbarLocation = () => {
+
+    (async () => {
+      let { status } = await Location.requestPermissionsAsync();
+      if(status !== 'granted') {
+        console.log('Premission to access location was denied');
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+      const { coords: {latitude, longitude} } = location;
+
+      const currentMessages = messages;
+
+      setMessages([createLocationMessage({
+        latitude,
+        longitude,
+      }), ...currentMessages]);
+    })();
+  }
+
   return (
     <View style={styles.container}>
       <Status />
       <MessageList messages={messages} onPressMessage={handlePressMessage}/>
-      <RenderToolbar />
+      <Toolbar 
+        onSubmit={handleSubmit}
+        onPressCamera={handlePressToolbarCamera}
+        onPressLocation={handlePressToolbarLocation}
+      />
       <RenderInputMethodEditor />
       {renderFullScreenImage()}
     </View>
