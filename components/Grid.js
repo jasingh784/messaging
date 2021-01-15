@@ -25,8 +25,8 @@ function Grid(props) {
     )
 }
 
-Grid.prototype = {
-    renderItem = PropTypes.func.isRequired,
+Grid.propTypes = {
+    renderItem: PropTypes.func.isRequired,
     numColumns: PropTypes.number,
     itemMargin: PropTypes.number,
 };

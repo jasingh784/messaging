@@ -6,13 +6,16 @@ import Status from './components/Status';
 
 import MessageList from './components/MessageList';
 import Toolbar from './components/Toolbar';
+import ImageGrid from './components/ImageGrid';
 
 import { createImageMessage, createLocationMessage, createTextMessage} from './utils/MessageUtils';
 
 
   const RenderInputMethodEditor = () => {
     return (
-      <View style={styles.inputMethodEditor}></View>
+      <View style={styles.inputMethodEditor}>
+        <ImageGrid />
+      </View>
     );
   }
 
