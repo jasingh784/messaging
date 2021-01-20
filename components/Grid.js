@@ -6,7 +6,7 @@ function Grid(props) {
 
     renderGridItem = (info) => {
         const { width } = Dimensions.get('window');
-
+        const { index } = info;
         const { renderItem, numColumns, itemMargin } = props;
 
         const size = PixelRatio.roundToNearestPixel(
